@@ -3,7 +3,12 @@ package chip.main;
 import java.awt.*;
 import java.awt.image.*;
 
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Scanner;
+
 import java.io.*;
+import java.nio.file.*;
 
 import chip.system.*;
 import chip.input.*;
@@ -27,11 +32,27 @@ public class Main implements Runnable {
         cpu = new CPU();
         screen = new Screen();
         
-        //cpu.load();
+        if (args == null || args.length == 0) {
+            System.err.println("Cannot load ROM.");
+            
+            System.exit(1);
+        }
+        
+        try {
+            byte[] buffer = loadFileBuffer(new File(args[0]));
+            
+            cpu.load(buffer);
+        } catch (IOException e) {
+            System.err.println("Cannot load ROM.");
+            
+            System.exit(1);
+        }
     }
     
-    public byte[] loadFileBuffer(File file) {
+    public byte[] loadFileBuffer(File file) throws IOException {
+        Path p = file.toPath();
         
+        return Files.readAllBytes(p);
     }
     
     public static void main(String[] args) {

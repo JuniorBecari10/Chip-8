@@ -44,7 +44,7 @@ public class Main implements Runnable {
     }
     
     public void tick() {
-        System.out.println(Keyboard.keyPressed());
+        
     }
     
     public void render() {

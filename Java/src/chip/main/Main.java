@@ -5,6 +5,7 @@ import java.awt.image.*;
 
 import chip.system.*;
 import chip.input.*;
+import chip.sound.*;
 
 public class Main implements Runnable {
     

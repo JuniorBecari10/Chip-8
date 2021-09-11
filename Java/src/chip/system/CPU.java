@@ -55,6 +55,12 @@ public class CPU {
         }
     }
     
+    public synchronized void load(byte[] buffer) {
+        for (int i = 0; i < buffer.length; i++) {
+            memory[0x200 + i] = buffer[i];
+        }
+    }
+    
     // Esse método performa o clock do Chip-8.
     public void clock() {
         

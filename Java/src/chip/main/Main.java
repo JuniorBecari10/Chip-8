@@ -3,6 +3,8 @@ package chip.main;
 import java.awt.*;
 import java.awt.image.*;
 
+import java.io.*;
+
 import chip.system.*;
 import chip.input.*;
 import chip.sound.*;
@@ -12,18 +14,30 @@ public class Main implements Runnable {
     private boolean running = false;
     private Thread thread;
     
+    // -------------------------------
+    
     public static CPU cpu;
     public static Screen screen;
+    
+    public static String[] args;
     
     //public static Toolkit toolkit = Toolkit.getDefaultToolkit();
     
     public Main() {
         cpu = new CPU();
         screen = new Screen();
+        
+        //cpu.load();
+    }
+    
+    public byte[] loadFileBuffer(File file) {
+        
     }
     
     public static void main(String[] args) {
         new Main().start();
+        
+        Main.args = args;
     }
     
     public synchronized void start() {
@@ -44,7 +58,7 @@ public class Main implements Runnable {
     }
     
     public void tick() {
-        
+        cpu.clock();
     }
     
     public void render() {

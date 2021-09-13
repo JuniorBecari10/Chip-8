@@ -34,6 +34,8 @@ public class CPU {
     public short pc;
     public byte  sp;
     
+    public boolean paused;
+    
     public CPU() {
         memory = new byte[4096];
         regs = new byte[16];
@@ -45,8 +47,10 @@ public class CPU {
         
         i = 0;
         
-        pc = 0;
+        pc = 0x200;
         sp = 0;
+        
+        paused = false;
         
         // Load sprites into memory
         
@@ -63,6 +67,8 @@ public class CPU {
     
     // Esse método performa o clock do Chip-8.
     public void clock() {
-        
+        if (!paused) {
+            
+        }
     }
 }

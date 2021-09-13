@@ -33,7 +33,7 @@ public class Main implements Runnable {
         screen = new Screen();
         
         if (args == null || args.length == 0) {
-            System.err.println("Cannot load ROM.");
+            System.err.println("Cannot load ROM. Args is null or empty.");
             
             System.exit(1);
         }
@@ -56,9 +56,9 @@ public class Main implements Runnable {
     }
     
     public static void main(String[] args) {
-        new Main().start();
-        
         Main.args = args;
+        
+        new Main().start();
     }
     
     public synchronized void start() {

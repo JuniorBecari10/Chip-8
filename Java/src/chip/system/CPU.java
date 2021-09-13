@@ -96,44 +96,85 @@ public class CPU {
     public void executeInstruction(byte opcode) {
         pc += 2;
         
-        byte x = (opcode & 0x0F00) >> 8;
-        byte y = (opcode & 0x00F0) >> 4;
+        byte x = (byte) ((opcode & 0x0F00) >> 8);
+        byte y = (byte) ((opcode & 0x00F0) >> 4);
         
         switch (opcode & 0xF000) {
             case 0x0000:
                 switch (opcode) {
-            case 0x00E0:
+            case 0x00E0: // CLS - Clear Screen
+                Main.screen.clear();
                 break;
-            case 0x00EE:
+            case 0x00EE: // RET - Pop stack
+                short[] oldStack = stack;
+                
+                stack = new short[oldStack.length - 1];
+                sp--;
+                
+                for (int i = 0; i < stack.length; i++) {
+                    stack[i] = oldStack[i];
+                }
+                
                 break;
         }
 
             break;
-        case 0x1000:
+        case 0x1000: // JP - Jump to nnn address
+            pc = (byte) (opcode & 0xFFF);
             break;
-        case 0x2000:
+        case 0x2000: // CALL - Call addr and push to stack pc value
+            short[] oldStack = stack;
+                
+            stack = new short[oldStack.length + 1];
+            sp++;
+            
+            for (int i = 0; i < stack.length; i++) {
+                stack[i] = oldStack[i];
+            }
+            
+            stack[stack.length - 1] = pc;
             break;
-        case 0x3000:
+        case 0x3000: // SE Vx, byte
+            if (regs[x] == (opcode & 0xFF))
+                pc += 2;
             break;
-        case 0x4000:
+        case 0x4000: // SNE Vx, byte
+            if (regs[x] != (opcode & 0xFF))
+                pc += 2;
             break;
-        case 0x5000:
+        case 0x5000: // SE Vx, Vy
+            if (regs[x] == regs[y])
+                pc += 2;
             break;
-        case 0x6000:
+        case 0x6000: // LD Vx, byte
+            regs[x] = (byte) (opcode & 0xFF);
             break;
-        case 0x7000:
+        case 0x7000: // ADD Vx, byte
+            regs[x] += (opcode & 0xFF);
             break;
         case 0x8000:
             switch (opcode & 0xF) {
-                case 0x0:
+                case 0x0: // LD Vx, Vy
+                    regs[x] = regs[y];
                     break;
-                case 0x1:
+                case 0x1: // OR Vx, Vy
+                    regs[x] |= regs[y];
                     break;
-                case 0x2:
+                case 0x2: // AND Vx, Vy
+                    regs[x] &= regs[y];
                     break;
-                case 0x3:
+                case 0x3: // XOR Vx, Vy
+                    regs[x] ^= regs[y];
                     break;
-                case 0x4:
+                case 0x4: // ADD Vx, Vy
+                    byte sum = (byte) (regs[x] += regs[y]);
+                    
+                    regs[0xF] = 0;
+                    
+                    if (sum > 0xFF) // Greater than 1 byte
+                        regs[0xF] = 1;
+                    
+                    regs[x] = sum;
                     break;
                 case 0x5:
                     break;

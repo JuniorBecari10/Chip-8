@@ -5,7 +5,7 @@ import javax.sound.sampled.*;
 // Fonte: StackOverflow
 public class Sound {
     
-    public static final float sampleRate = 8000f;
+    public static final float sampleRate = 8000f; // 440
     
     public static void tone(int hz, int msecs) throws LineUnavailableException {
         tone(hz, msecs, 1.0);

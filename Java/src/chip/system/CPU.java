@@ -1,11 +1,15 @@
 package chip.system;
 
+import java.util.Random;
+
 import javax.sound.sampled.LineUnavailableException;
 
 import chip.main.*;
 import chip.sound.Sound;
 
 public class CPU {
+    
+    public static Random random;
     
     public int[] sprites = {
         0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -60,6 +64,8 @@ public class CPU {
         paused = false;
         speed = 10;
         
+        random = new Random();
+        
         // Load sprites into memory
         
         for (int i = 0; i < sprites.length; i++) {
@@ -78,7 +84,10 @@ public class CPU {
         for (int i = 0; i < speed; i++) {
             if (!paused) {
                 byte opcode = (byte) (memory[pc] << 8 | memory[pc + 1]);
-                executeInstruction(opcode);
+                
+                try {
+                    executeInstruction(opcode);
+                } catch (Exception e) {}
             }
         }
         
@@ -93,7 +102,7 @@ public class CPU {
         }
     }
     
-    public void executeInstruction(byte opcode) {
+    public void executeInstruction(byte opcode) throws Exception {
         pc += 2;
         
         byte x = (byte) ((opcode & 0x0F00) >> 8);
@@ -102,10 +111,10 @@ public class CPU {
         switch (opcode & 0xF000) {
             case 0x0000:
                 switch (opcode) {
-            case 0x00E0: // CLS - Clear Screen
+            case (byte) 0x00E0: // CLS - Clear Screen
                 Main.screen.clear();
                 break;
-            case 0x00EE: // RET - Pop stack
+            case (byte) 0x00EE: // RET - Pop stack
                 short[] oldStack = stack;
                 
                 stack = new short[oldStack.length - 1];
@@ -176,22 +185,50 @@ public class CPU {
                     
                     regs[x] = sum;
                     break;
-                case 0x5:
+                case 0x5: // SUB Vx, Vy
+                    regs[0xF] = 0;
+                    
+                    if (regs[x] > regs[y])
+                        regs[0xF] = 1;
+                    
+                    regs[x] -= regs[y];
+                    
+                    if (regs[x] < 0) { // Handle negative
+                        byte off = regs[x] *= -1;
+                        
+                        regs[x] = (byte) (255 - off);
+                    }
                     break;
-                case 0x6:
+                case 0x6: // SHR Vx, Vy
+                    regs[0xF] = (byte) (regs[x] & 0x1);
+                    
+                    regs[x] >>= 1;
                     break;
-                case 0x7:
+                case 0x7: // SUBN Vx, Vy
+                    regs[0xF] = 0;
+                    
+                    if (regs[y] > regs[x])
+                        regs[0xF] = 1;
+                    
+                    regs[x] = (byte) (regs[y] - regs[x]);
                     break;
-                case 0xE:
+                case 0xE: // SHL Vx, Vy
+                    regs[0xF] = (byte) (regs[x] & 0x80);
+                    
+                    regs[x] <<= 1;
                     break;
             }
 
             break;
-        case 0x9000:
+        case 0x9000: // SNE Vx, Vy
+            if (regs[x] != regs[y])
+                pc += 2;
             break;
-        case 0xA000:
+        case 0xA000: // LD I, addr
+            i = (byte) (opcode & 0xFFF);
             break;
-        case 0xB000:
+        case 0xB000: // JP V0, addr
+            pc = (byte) ((opcode & 0xFFF) + regs[0]);
             break;
         case 0xC000:
             break;

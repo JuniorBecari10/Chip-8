@@ -5,6 +5,7 @@ import java.util.Random;
 import javax.sound.sampled.LineUnavailableException;
 
 import chip.main.*;
+import chip.input.*;
 import chip.sound.Sound;
 
 public class CPU {
@@ -82,6 +83,9 @@ public class CPU {
     // Esse método performa o clock do Chip-8.
     public void clock() {
         for (int i = 0; i < speed; i++) {
+            //System.out.println(pc);
+            if (pc >= memory.length) pc = (byte) (memory.length);
+            
             if (!paused) {
                 byte opcode = (byte) (memory[pc] << 8 | memory[pc + 1]);
                 
@@ -230,15 +234,37 @@ public class CPU {
         case 0xB000: // JP V0, addr
             pc = (byte) ((opcode & 0xFFF) + regs[0]);
             break;
-        case 0xC000:
+        case 0xC000: // RND Vx, byte
+            regs[x] = (byte) (random.nextInt(255) & (opcode & 0xFF));
             break;
-        case 0xD000:
+        case 0xD000: // DRW Vx, Vy, nibble
+            byte width = 8;
+            byte height = (byte) (opcode & 0xF);
+            
+            regs[0xF] = 0;
+            
+            for (int row = 0; row < height; row++) {
+                byte sprite = memory[i + row];
+                
+                for (int col = 0; col < width; col++) {
+                    if ((sprite & 0x80) > 0) {
+                        if (Main.screen.setPixel(regs[x] + col, regs[y] + row))
+                            regs[0xF] = 1;
+                    }
+                    
+                    sprite <<= 1;
+                }
+            }
             break;
         case 0xE000:
             switch (opcode & 0xFF) {
-                case 0x9E:
+                case 0x9E: // SKP Vx
+                    if (Keyboard.getKeyPressedEmulated() == regs[x])
+                        pc += 2;
                     break;
-                case 0xA1:
+                case 0xA1: // SKNP Vx
+                    if (Keyboard.getKeyPressedEmulated() =!= regs[x])
+                        pc += 2;
                     break;
             }
 

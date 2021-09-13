@@ -20,6 +20,10 @@ public class Keyboard extends KeyAdapter {
         return keyPressed;
     }
     
+    public static int getKeyPressedEmulated() {
+        return keyPressed.getEmulatedKey();
+    }
+    
     public static Key[] keys = {
         new Key(KeyEvent.VK_1, 0x1),
         new Key(KeyEvent.VK_2, 0x2),
